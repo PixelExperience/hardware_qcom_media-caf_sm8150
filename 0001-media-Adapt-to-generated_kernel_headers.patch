@@ -1,0 +1,189 @@
+From 1ab560566ad72c66a543b54ba7b306ad29f55490 Mon Sep 17 00:00:00 2001
+From: Dmitry Eliseev <xeondead@gmail.com>
+Date: Tue, 2 Jul 2019 14:40:24 +0300
+Subject: [PATCH] media: Adapt to generated_kernel_headers
+
+Change-Id: I98f18eb5f00fd45a79d187c14f3c447b6ce16044
+---
+ hypv-intercept/Android.mk            | 2 +-
+ libarbitrarybytes/Android.mk         | 4 +---
+ libc2dcolorconvert/Android.mk        | 8 ++------
+ mm-video-v4l2/vidc/common/Android.mk | 6 ++----
+ mm-video-v4l2/vidc/vdec/Android.mk   | 9 +++++----
+ mm-video-v4l2/vidc/venc/Android.mk   | 9 +++++----
+ 6 files changed, 16 insertions(+), 22 deletions(-)
+
+diff --git a/hypv-intercept/Android.mk b/hypv-intercept/Android.mk
+index 6d4e6bac..4bbe0e72 100644
+--- a/hypv-intercept/Android.mk
++++ b/hypv-intercept/Android.mk
+@@ -17,6 +17,6 @@ LOCAL_MODULE := libhypv_intercept
+ LOCAL_MODULE_PATH_32      := $(TARGET_OUT_VENDOR)/lib
+ LOCAL_MODULE_PATH_64      := $(TARGET_OUT_VENDOR)/lib64
+ 
+-LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
++LOCAL_HEADER_LIBRARIES  := generated_kernel_headers
+ 
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/libarbitrarybytes/Android.mk b/libarbitrarybytes/Android.mk
+index 83b678ff..c79e224a 100644
+--- a/libarbitrarybytes/Android.mk
++++ b/libarbitrarybytes/Android.mk
+@@ -5,7 +5,6 @@ include $(CLEAR_VARS)
+ libarbitrarybytes-def := -Werror
+ libarbitrarybytes-def += -D_ANDROID_
+ 
+-libarbitrarybytes-inc  := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+ libarbitrarybytes-inc  += $(LOCAL_PATH)/inc
+ libarbitrarybytes-inc  += $(LOCAL_PATH)/../mm-video-v4l2/vidc/common/inc/
+ libarbitrarybytes-inc  += $(LOCAL_PATH)/../mm-core/inc
+@@ -18,8 +17,7 @@ LOCAL_VENDOR_MODULE    := true
+ LOCAL_C_INCLUDES       := $(libarbitrarybytes-inc)
+ LOCAL_CFLAGS           := $(libarbitrarybytes-def)
+ 
+-LOCAL_HEADER_LIBRARIES := libutils_headers
+-
++LOCAL_HEADER_LIBRARIES := libutils_headers generated_kernel_headers
+ LOCAL_SHARED_LIBRARIES := liblog libcutils
+ 
+ LOCAL_SRC_FILES        := src/frameparser.cpp
+diff --git a/libc2dcolorconvert/Android.mk b/libc2dcolorconvert/Android.mk
+index c9a3297c..a5f6761a 100644
+--- a/libc2dcolorconvert/Android.mk
++++ b/libc2dcolorconvert/Android.mk
+@@ -8,13 +8,11 @@ LOCAL_SRC_FILES := \
+ LOCAL_C_INCLUDES := \
+     $(TARGET_OUT_HEADERS)/adreno
+ 
+-
+-LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+-
+ LOCAL_HEADER_LIBRARIES := \
+         libutils_headers \
+         libhardware_headers \
+-        display_headers
++        display_headers \
++        generated_kernel_headers
+ 
+ LOCAL_SHARED_LIBRARIES := liblog libdl
+ 
+@@ -24,6 +22,4 @@ LOCAL_MODULE := libc2dcolorconvert
+ 
+ LOCAL_VENDOR_MODULE := true
+ 
+-LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+-
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/mm-video-v4l2/vidc/common/Android.mk b/mm-video-v4l2/vidc/common/Android.mk
+index 17507313..2d8f90ca 100644
+--- a/mm-video-v4l2/vidc/common/Android.mk
++++ b/mm-video-v4l2/vidc/common/Android.mk
+@@ -24,7 +24,6 @@ libmm-vidc-inc      := $(LOCAL_PATH)/inc
+ libmm-vidc-inc      += $(TOP)/$(call project-path-for,qcom-media)/mm-core/inc
+ libmm-vidc-inc      += $(TARGET_OUT_HEADERS)/qcom/display
+ libmm-vidc-inc      += $(TOP)/$(call project-path-for,qcom-media)/libc2dcolorconvert
+-libmm-vidc-inc      += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+ libmm-vidc-inc      += $(TOP)/hardware/libhardware/include
+ 
+ LOCAL_MODULE                    := libOmxVidcCommon
+@@ -37,13 +36,12 @@ LOCAL_PRELINK_MODULE      := false
+ LOCAL_SHARED_LIBRARIES    := liblog libcutils libdl
+ 
+ LOCAL_HEADER_LIBRARIES := \
+-        libutils_headers
++        libutils_headers \
++        generated_kernel_headers
+ 
+ LOCAL_SRC_FILES   += src/vidc_common.cpp
+ LOCAL_SRC_FILES   += src/vidc_vendor_extensions.cpp
+ 
+-LOCAL_ADDITIONAL_DEPENDENCIES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+-
+ include $(BUILD_STATIC_LIBRARY)
+ 
+ # ---------------------------------------------------------------------------------
+diff --git a/mm-video-v4l2/vidc/vdec/Android.mk b/mm-video-v4l2/vidc/vdec/Android.mk
+index 995fb8b6..cbd673ec 100644
+--- a/mm-video-v4l2/vidc/vdec/Android.mk
++++ b/mm-video-v4l2/vidc/vdec/Android.mk
+@@ -65,7 +65,6 @@ libmm-vdec-inc          += $(TARGET_OUT_HEADERS)/adreno
+ libmm-vdec-inc      	+= $(call project-path-for,qcom-media)/libc2dcolorconvert
+ libmm-vdec-inc      	+= $(TARGET_OUT_HEADERS)/mm-video/SwVdec
+ libmm-vdec-inc      	+= $(TARGET_OUT_HEADERS)/mm-video/swvdec
+-libmm-vdec-inc      	+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+ libmm-vdec-inc      	+= $(call project-path-for,qcom-media)/libarbitrarybytes/inc
+ 
+ ifeq ($(PLATFORM_SDK_VERSION), 18)  #JB_MR2
+@@ -74,7 +73,7 @@ libmm-vdec-inc += $(call project-path-for,qcom-media)/libstagefrighthw
+ endif
+ 
+ # Common Dependencies
+-libmm-vdec-add-dep := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
++LOCAL_HEADER_LIBRARIES  := generated_kernel_headers
+ 
+ ifeq ($(call is-platform-sdk-version-at-least, 19),true)
+ # This feature is enabled for Android KK+
+@@ -108,7 +107,8 @@ LOCAL_HEADER_LIBRARIES := \
+         libnativebase_headers \
+         libutils_headers \
+         libhardware_headers \
+-        display_headers
++        display_headers \
++        generated_kernel_headers
+ 
+ LOCAL_C_INCLUDES                += $(libmm-vdec-inc)
+ LOCAL_ADDITIONAL_DEPENDENCIES   := $(libmm-vdec-add-dep)
+@@ -150,7 +150,8 @@ LOCAL_HEADER_LIBRARIES := \
+         libnativebase_headers \
+         libutils_headers \
+         libhardware_headers \
+-        display_headers
++        display_headers \
++        generated_kernel_headers
+ 
+ LOCAL_C_INCLUDES              += $(libmm-vdec-inc)
+ LOCAL_ADDITIONAL_DEPENDENCIES := $(libmm-vdec-add-dep)
+diff --git a/mm-video-v4l2/vidc/venc/Android.mk b/mm-video-v4l2/vidc/venc/Android.mk
+index 1407038b..efe8a084 100644
+--- a/mm-video-v4l2/vidc/venc/Android.mk
++++ b/mm-video-v4l2/vidc/venc/Android.mk
+@@ -68,7 +68,6 @@ libmm-venc-inc      += $(call project-path-for,qcom-media)/libplatformconfig
+ libmm-venc-inc      += $(TARGET_OUT_HEADERS)/adreno
+ libmm-venc-inc      += $(call project-path-for,qcom-media)/libc2dcolorconvert
+ libmm-venc-inc      += $(TARGET_OUT_HEADERS)/libvqzip
+-libmm-venc-inc      += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+ libmm-venc-inc      += $(TOP)/frameworks/native/libs/nativewindow/include
+ libmm-venc-inc      += $(TOP)/frameworks/native/libs/nativebase/include
+ libmm-venc-inc      += $(TOP)/frameworks/native/libs/arect/include
+@@ -82,7 +81,7 @@ libmm-venc-inc      += hardware/libhardware/include/hardware
+ endif
+ 
+ # Common Dependencies
+-libmm-venc-add-dep  := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
++LOCAL_HEADER_LIBRARIES  := generated_kernel_headers
+ 
+ # ---------------------------------------------------------------------------------
+ # 			Make the Shared library (libOmxVenc)
+@@ -101,7 +100,8 @@ LOCAL_HEADER_LIBRARIES := \
+         libcutils_headers \
+         libutils_headers \
+         libhardware_headers \
+-        display_headers
++        display_headers \
++        generated_kernel_headers
+ 
+ LOCAL_C_INCLUDES                := $(libmm-venc-inc)
+ LOCAL_ADDITIONAL_DEPENDENCIES   := $(libmm-venc-add-dep)
+@@ -145,7 +145,8 @@ LOCAL_HEADER_LIBRARIES := \
+         libnativebase_headers \
+         libutils_headers \
+         libhardware_headers \
+-        display_headers
++        display_headers \
++        generated_kernel_headers
+ 
+ LOCAL_C_INCLUDES                := $(libmm-venc-inc)
+ LOCAL_ADDITIONAL_DEPENDENCIES   := $(libmm-venc-add-dep)
+-- 
+2.11.0
+
